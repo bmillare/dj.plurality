@@ -1,0 +1,1 @@
+(defproject dj.plurality "0.1.0")
