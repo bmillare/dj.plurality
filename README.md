@@ -1,12 +1,12 @@
 # dj.plurality
 
-## New developments
+## Updates
 
-Working on decomplecting current implementation
+Decomplection
 
--Making plural-fns immutable
+- plural-fns are now immutable values
 
--Extensive use of metadata for extension points
+- metadata is used extensively for extensibility
 
 # Motivation
 
@@ -20,23 +20,35 @@ Plural functions were coined [here](https://groups.google.com/forum/?fromgroups=
 
 - An extensible-fn is a fn that supports:
  - modify-implementation
- - and provides a way to access all the implementations
+ - provides a way to access all the implementations
 
-This is accomplished via metadata. All of this data is stored in the metadata of the plural-fn in the key, :dj.plurality
+This is accomplished via metadata. All of this data is stored in the metadata of the plural-fn in the key, `:dj.plurality`
 
 For example:
 
-`(with-meta plural-fn (merge existing-metadata {:dj.plurality {:add-implementation (fn ...) ... :implementations [...]}}`
+```lisp
+(with-meta plural-fn
+ (merge existing-metadata
+        {:dj.plurality {:add-implementation (fn ...)
+	                ...
+	 :implementations [...]}}
+```
 
 dj.plurality provides helper functions to extract the information from the metadata, call the appropriate functions, and return the correct value.
+
+```lisp
+(update-implementation plural-fn
+ assoc
+ [:triangle :square] (fn [x y] (println x y)))
+```
 
 ## Why use metadata instead of protocols?
 
 I don't want to create a new type that implements IFn and all my protocols. I don't want to extend all fns to a new protocol. Absolute performance of extending fns is not an objective. The metadata is largely that, metadata, technically the plural-fn still functions as plural-fn even with the metadata removed. Extensibility is decomplected.
 
 - plural-fn generators
- -to be flexible and efficient, the resolving algorithm will always be tied to plural-fn, thus we must delegate the majority of the work generating the plural-fn.
- -if you want you can use fn composition to generate the plural-fns, for arity you would need to call apply
- -if performance is critical, you could use macros and be explicit about arguments
+ - to be flexible and efficient, the resolving algorithm will always be tied to plural-fn, thus we must delegate the majority of the work generating the plural-fn.
+ - if you want you can use fn composition to generate the plural-fns, for arity you would need to call apply
+ - if performance is critical, you could use macros and be explicit about arguments
 
 dj.plurality will provide core implementations such as multimethods and predicate dispatch.

@@ -34,6 +34,9 @@ plural-fn to another
          args))
 
 (defn ->all-fn
+  "
+plural-fn that returns a seq of the results of all methods
+"
   [implementations]
   (with-meta (fn [& args]
                (map #(apply % args)
@@ -109,34 +112,6 @@ Arity optimized for 5 or less args, but supports greater arity.
                                              (->simple-multi-fn imps dispatch-fn))
                     :implementations implementations}}))
 
-;; Circular macro dependencies causes infinite loop. Need to use
-;; fn-call/eval to pause cycle.
-
-;; Note tradeoffs, because of eval, extending is really slow (1000x
-;; slower), but evaluation is roughly 50% faster.
-
-;; Macro multimethods are about 30% faster than multimethods but this
-;; implementation does not do any caching.
-
-;; Protocols are still 2x faster
-(defn ->macro-multi-fn-helper [dispatch-fn args]
-  (fn [implementations]
-    (eval (macroexpand-1 `(->macro-multi-fn ~implementations
-                                            ~dispatch-fn
-                                            ~args)))))
-
-(defmacro ->macro-multi-fn
-  [implementations dispatch-fn args]
-  `(let [df# ~dispatch-fn
-         imps# ~implementations]
-     (with-meta (fn ~args
-                  ((imps# (df# ~@args))
-                   ~@args))
-       {:dj.plurality {:modify-implementation (->macro-multi-fn-helper df# '~args)
-                       :implementations imps#}})))
-
-;; todo, implement macro version with hierarchies
-
 (defn ->simple-predicate-fn
   [implementations]
   (with-meta (fn [& args]
@@ -150,34 +125,49 @@ Arity optimized for 5 or less args, but supports greater arity.
 
 (defmacro ->macro-predicate-fn
   "
-implementations should be a vector of pairs, matcing form -> fn
+implementations should be a literal vector of pairs, matcing form -> fn
 
 Only up to 5 arity is supported
 "
   [implementations]
-  `(with-meta (fn
-                ([a1#]
-                   ((m/match [a1#]
-                             ~@(apply concat implementations))
-                    a1#))
-                ([a1# a2#]
-                   ((m/match [a1# a2#]
-                             ~@(apply concat implementations))
-                    a1# a2#))
-                ([a1# a2# a3#]
-                   ((m/match [a1# a2# a3#]
-                             ~@(apply concat implementations))
-                    a1# a2# a3#))
-                ([a1# a2# a3# a4#]
-                   ((m/match [a1# a2# a3# a4#]
-                             ~@(apply concat implementations))
-                    a1# a2# a3# a4#))
-                ([a1# a2# a3# a4# a5#]
-                   ((m/match [a1# a2# a3# a4# a5#]
-                             ~@(apply concat implementations))
-                    a1# a2# a3# a4# a5#)))
-     {:dj.plurality {:modify-implementation ->simple-predicate-fn
-                     :implementations implementations}}))
+  `(let [imps# ~implementations]
+     (with-meta ~(if (empty? implementations)
+                   `(fn [])
+                   (case (count (first (first implementations)))
+                     1 `(fn [a1#]
+                          ((m/match [a1#]
+                                    ~@(apply concat implementations))
+                           a1#))
+                     2 `(fn [a1# a2#]
+                          ((m/match [a1# a2#]
+                                    ~@(apply concat implementations))
+                           a1# a2#))
+                     3 `(fn [a1# a2# a3#]
+                          ((m/match [a1# a2# a3#]
+                                    ~@(apply concat implementations))
+                           a1# a2# a3#))
+                     4 `(fn [a1# a2# a3# a4#]
+                          ((m/match [a1# a2# a3# a4#]
+                                    ~@(apply concat implementations))
+                           a1# a2# a3# a4#))
+                     5 `(fn [a1# a2# a3# a4# a5#]
+                          ((m/match [a1# a2# a3# a4# a5#]
+                                    ~@(apply concat implementations))
+                           a1# a2# a3# a4# a5#))))
+       {:dj.plurality {:modify-implementation ~(let [imps (gensym "imps")]
+                                                 `(fn [~imps]
+                                                   ;; Since this is a
+                                                   ;; macro, a recursive
+                                                   ;; call would create an
+                                                   ;; infinite expansion,
+                                                   ;; we wrap this in an
+                                                   ;; eval to delay
+                                                   ;; computation.
+                                                    (-> `(dj.plurality/->macro-predicate-fn
+                                                          ~~imps)
+                                                        macroexpand-1
+                                                        eval)))
+                       :implementations imps#}})))
 
 ;; ----------------------------------------------------------------------
 
