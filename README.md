@@ -59,3 +59,19 @@ I don't want to create a new type that implements IFn and all my protocols. I do
  - if performance is critical, you could use macros and be explicit about arguments
 
 dj.plurality will provide core implementations such as multimethods and predicate dispatch.
+
+## Example Usage
+
+```lisp
+(require '[dj.plurality :as dp])
+(let [x (dp/->simple-multi-fn {java.lang.Long inc}
+                              type)
+      y (dp/update-implementation x
+                                  assoc
+                                  java.lang.Double
+                                  dec)]
+     [(x 3)
+      (y 3.0)
+      (y 1)])
+=> [4 2.0 2]
+```
