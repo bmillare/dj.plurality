@@ -41,7 +41,7 @@ plural-fn that returns a seq of the results of all methods
   (with-meta (fn [& args]
                (map #(apply % args)
                     implementations))
-    {:dj.plurality {:modify-implementation ->all-fn
+    {:dj.plurality {:modify-implementations ->all-fn
                     :implementations implementations}}))
 
 (defn ->broadcast-fn
@@ -50,7 +50,7 @@ plural-fn that returns a seq of the results of all methods
                (dorun
                 (map #(apply % args)
                      implementations)))
-    {:dj.plurality {:modify-implementation ->broadcast-fn
+    {:dj.plurality {:modify-implementations ->broadcast-fn
                     :implementations implementations}}))
 
 (defn ->random-fn
@@ -60,7 +60,7 @@ plural-fn that returns a seq of the results of all methods
                     nil
                     (apply (rand-nth implementations)
                            args)))
-       {:dj.plurality {:modify-implementation ->random-fn
+       {:dj.plurality {:modify-implementations ->random-fn
                        :implementations implementations}}))
   ([]
      (->random-fn [])))
@@ -71,6 +71,9 @@ Multimethods without hierarchies.
 
 TODO: Add hierarchies.
 
+implementations must be a map of dispatch-values -> method fns
+dispatch-fn is like a multimethod dispatch-fn
+
 Arity optimized for 5 or less args, but supports greater arity.
 "
   [implementations dispatch-fn]
@@ -79,27 +82,27 @@ Arity optimized for 5 or less args, but supports greater arity.
                   ((implementations (dispatch-fn a1))
                    a1))
                ([a1 a2]
-                    ((implementations (dispatch-fn a1 a2))
-                     a1
-                     a2))
+                  ((implementations (dispatch-fn a1 a2))
+                   a1
+                   a2))
                ([a1 a2 a3]
-                    ((implementations (dispatch-fn a1 a2 a3))
-                     a1
-                     a2
-                     a3))
+                  ((implementations (dispatch-fn a1 a2 a3))
+                   a1
+                   a2
+                   a3))
                ([a1 a2 a3 a4]
-                    ((implementations (dispatch-fn a1 a2 a3 a4))
-                     a1
-                     a2
-                     a3
-                     a4))
+                  ((implementations (dispatch-fn a1 a2 a3 a4))
+                   a1
+                   a2
+                   a3
+                   a4))
                ([a1 a2 a3 a4 a5]
-                    ((implementations (dispatch-fn a1 a2 a3 a4 a5))
-                     a1
-                     a2
-                     a3
-                     a4
-                     a5))
+                  ((implementations (dispatch-fn a1 a2 a3 a4 a5))
+                   a1
+                   a2
+                   a3
+                   a4
+                   a5))
                ([a1 a2 a3 a4 a5 & args]
                   (apply (implementations (apply dispatch-fn a1 a2 a3 a4 a5 args))
                          a1
@@ -108,8 +111,8 @@ Arity optimized for 5 or less args, but supports greater arity.
                          a4
                          a5
                          args)))
-    {:dj.plurality {:modify-implementation (fn [imps]
-                                             (->simple-multi-fn imps dispatch-fn))
+    {:dj.plurality {:modify-implementations (fn [imps]
+                                              (->simple-multi-fn imps dispatch-fn))
                     :implementations implementations}}))
 
 (defn ->simple-predicate-fn
@@ -120,7 +123,7 @@ Arity optimized for 5 or less args, but supports greater arity.
                                           (apply pred? args)))
                                 first)]
                  (apply match args)))
-    {:dj.plurality {:modify-implementation ->simple-predicate-fn
+    {:dj.plurality {:modify-implementations ->simple-predicate-fn
                     :implementations implementations}}))
 
 (defmacro ->macro-predicate-fn
@@ -154,19 +157,19 @@ Only up to 5 arity is supported
                           ((m/match [a1# a2# a3# a4# a5#]
                                     ~@(apply concat implementations))
                            a1# a2# a3# a4# a5#))))
-       {:dj.plurality {:modify-implementation ~(let [imps (gensym "imps")]
-                                                 `(fn [~imps]
-                                                   ;; Since this is a
-                                                   ;; macro, a recursive
-                                                   ;; call would create an
-                                                   ;; infinite expansion,
-                                                   ;; we wrap this in an
-                                                   ;; eval to delay
-                                                   ;; computation.
-                                                    (-> `(dj.plurality/->macro-predicate-fn
-                                                          ~~imps)
-                                                        macroexpand-1
-                                                        eval)))
+       {:dj.plurality {:modify-implementations ~(let [imps (gensym "imps")]
+                                                  `(fn [~imps]
+                                                     ;; Since this is a
+                                                     ;; macro, a recursive
+                                                     ;; call would create an
+                                                     ;; infinite expansion,
+                                                     ;; we wrap this in an
+                                                     ;; eval to delay
+                                                     ;; computation.
+                                                     (-> `(dj.plurality/->macro-predicate-fn
+                                                           ~~imps)
+                                                         macroexpand-1
+                                                         eval)))
                        :implementations imps#}})))
 
 ;; ----------------------------------------------------------------------

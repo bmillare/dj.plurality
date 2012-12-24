@@ -29,7 +29,7 @@ For example:
 ```lisp
 (with-meta plural-fn
  (merge existing-metadata
-        {:dj.plurality {:add-implementation (fn ...)
+        {:dj.plurality {:modify-implementations (fn ...)
 	                ...
 	 :implementations [...]}}
 ```
@@ -41,6 +41,10 @@ dj.plurality provides helper functions to extract the information from the metad
  assoc
  [:triangle :square] (fn [x y] (println x y)))
 ```
+
+### extensible-fn detail
+
+an extensible function has metadata with key `:dj.plurality` and value a map that has keys `:modify-implementations` and `:implementations`. `:modify-implementations` maps to a fn that accepts the current collection of implementations and returns a new collection of implementations. The key `:implementations` has the current collection of implementations.
 
 ## Why use metadata instead of protocols?
 
