@@ -9,13 +9,13 @@ updates implementations with new value from call to f on implementations and arg
 
 In detail:
 
-A modify-implementation fn must accept the new implementations and
+A modify-implementations fn must accept the new implementations and
 must return the same type of plural-fn but with new implementations
 
 "
   [plural-fn f & args]
-  (let [{:keys [implementations modify-implementation]} (:dj.plurality (meta plural-fn))]
-    (modify-implementation (apply f implementations args))))
+  (let [{:keys [implementations modify-implementations]} (:dj.plurality (meta plural-fn))]
+    (modify-implementations (apply f implementations args))))
 
 (defn convert-implementations
   "
