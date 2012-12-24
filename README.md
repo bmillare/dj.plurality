@@ -31,7 +31,7 @@ For example:
  (merge existing-metadata
         {:dj.plurality {:modify-implementations (fn ...)
 	                ...
-	 :implementations [...]}}
+         :implementations [...]}}
 ```
 
 dj.plurality provides helper functions to extract the information from the metadata, call the appropriate functions, and return the correct value.
