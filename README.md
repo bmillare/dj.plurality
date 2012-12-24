@@ -33,7 +33,7 @@ For example:
                         :implementations [...]}}
 ```
 
-dj.plurality provides helper functions to extract the information from the metadata, call the appropriate functions, and return the correct value.
+dj.plurality provides helper functions to extract the information from the metadata, call the appropriate functions, and return the new plural-fn with updated implementations.
 
 ```lisp
 (update-implementation plural-fn
