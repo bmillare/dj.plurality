@@ -55,8 +55,7 @@ I don't want to create a new type that implements IFn and all my protocols. I do
 
 - plural-fn generators
  - to be flexible and efficient, the resolving algorithm will always be tied to plural-fn, thus we must delegate the majority of the work generating the plural-fn.
- - if you want you can use fn composition to generate the plural-fns, for arity you would need to call apply
- - if performance is critical, you could use macros and be explicit about arguments
+ - if performance is critical, once needs to be wary of arity, and one can overload on arity or use macros
 
 dj.plurality will provide core implementations such as multimethods and predicate dispatch.
 
