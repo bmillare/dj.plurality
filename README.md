@@ -51,7 +51,7 @@ An extensible function has metadata with key `:dj.plurality` mapped to a map tha
 
 ## Why use metadata instead of protocols?
 
-I don't want to create a new type that implements IFn and all my protocols. I don't want to extend all fns to a new protocol. Absolute performance of extending fns is not an objective. The metadata is largely that, metadata, technically the plural-fn still functions as plural-fn even with the metadata removed. Extensibility is decomplected.
+I don't want to create a new type that implements IFn and all my protocols. I don't want to extend all fns to a new protocol. Maximum performance of the operation of extending the plural-fn is not an objective. The metadata is largely that, metadata, technically the plural-fn still functions as plural-fn even with the metadata removed. Extensibility is decomplected.
 
 - plural-fn generators
  - to be flexible and efficient, the resolving algorithm will always be tied to plural-fn, thus we must delegate the majority of the work generating the plural-fn.
