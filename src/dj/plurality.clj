@@ -76,44 +76,115 @@ dispatch-fn is like a multimethod dispatch-fn
 
 Arity optimized for 5 or less args, but supports greater arity.
 "
-  [implementations dispatch-fn]
-  (with-meta (fn
-               ([a1]
-                  ((implementations (dispatch-fn a1))
-                   a1))
-               ([a1 a2]
-                  ((implementations (dispatch-fn a1 a2))
-                   a1
-                   a2))
-               ([a1 a2 a3]
-                  ((implementations (dispatch-fn a1 a2 a3))
-                   a1
-                   a2
-                   a3))
-               ([a1 a2 a3 a4]
-                  ((implementations (dispatch-fn a1 a2 a3 a4))
-                   a1
-                   a2
-                   a3
-                   a4))
-               ([a1 a2 a3 a4 a5]
-                  ((implementations (dispatch-fn a1 a2 a3 a4 a5))
-                   a1
-                   a2
-                   a3
-                   a4
-                   a5))
-               ([a1 a2 a3 a4 a5 & args]
-                  (apply (implementations (apply dispatch-fn a1 a2 a3 a4 a5 args))
-                         a1
-                         a2
-                         a3
-                         a4
-                         a5
-                         args)))
-    {:dj.plurality {:modify-implementations (fn [imps]
-                                              (->simple-multi-fn imps dispatch-fn))
-                    :implementations implementations}}))
+  ([implementations dispatch-fn]
+     (with-meta (fn
+                  ([a1]
+                     ((implementations (dispatch-fn a1))
+                      a1))
+                  ([a1 a2]
+                     ((implementations (dispatch-fn a1 a2))
+                      a1
+                      a2))
+                  ([a1 a2 a3]
+                     ((implementations (dispatch-fn a1 a2 a3))
+                      a1
+                      a2
+                      a3))
+                  ([a1 a2 a3 a4]
+                     ((implementations (dispatch-fn a1 a2 a3 a4))
+                      a1
+                      a2
+                      a3
+                      a4))
+                  ([a1 a2 a3 a4 a5]
+                     ((implementations (dispatch-fn a1 a2 a3 a4 a5))
+                      a1
+                      a2
+                      a3
+                      a4
+                      a5))
+                  ([a1 a2 a3 a4 a5 & args]
+                     (apply (implementations (apply dispatch-fn a1 a2 a3 a4 a5 args))
+                            a1
+                            a2
+                            a3
+                            a4
+                            a5
+                            args)))
+       {:dj.plurality {:modify-implementations (fn [imps]
+                                                 (->simple-multi-fn imps dispatch-fn))
+                       :implementations implementations}}))
+  ([implementations default-imp dispatch-fn]
+     (with-meta (fn
+                  ([a1]
+                     (let [f (implementations (dispatch-fn a1))]
+                       (if f
+                         (f a1)
+                         (default-imp a1))))
+                  ([a1 a2]
+                     (let [f (implementations (dispatch-fn a1 a2))]
+                       (if f
+                         (f a1
+                            a2)
+                         (default-imp
+                           a1
+                           a2))))
+                  ([a1 a2 a3]
+                     (let [f (implementations (dispatch-fn a1 a2 a3))]
+                       (if f
+                         (f a1
+                            a2
+                            a3)
+                         (default-imp
+                           a1
+                           a2
+                           a3))))
+                  ([a1 a2 a3 a4]
+                     (let [f (implementations (dispatch-fn a1 a2 a3 a4))]
+                       (if f
+                         (f a1
+                            a2
+                            a3
+                            a4)
+                         (default-imp
+                           a1
+                           a2
+                           a3
+                           a4))))
+                  ([a1 a2 a3 a4 a5]
+                     (let [f (implementations (dispatch-fn a1 a2 a3 a4 a5))]
+                       (if f
+                         (f a1
+                            a2
+                            a3
+                            a4
+                            a5)
+                         (default-imp
+                           a1
+                           a2
+                           a3
+                           a4
+                           a5))))
+                  ([a1 a2 a3 a4 a5 & args]
+                     (let [f (implementations (apply dispatch-fn a1 a2 a3 a4 a5 args))]
+                       (if f
+                         (apply f
+                                a1
+                                a2
+                                a3
+                                a4
+                                a5
+                                args)
+                         (apply default-imp
+                                a1
+                                a2
+                                a3
+                                a4
+                                a5
+                                args)))))
+       {:dj.plurality {:modify-implementations (fn [imps]
+                                                 (->simple-multi-fn imps default-imp dispatch-fn))
+                       :implementations implementations}})))
 
 (defn ->simple-predicate-fn
   [implementations]
