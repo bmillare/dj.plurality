@@ -8,6 +8,10 @@ Decomplection
 
 - metadata is used extensively for extensibility
 
+## Wiki
+
+See [wiki](https://github.com/bmillare/dj.plurality/wiki) for more articles on the subject.
+
 # Motivation
 
 We want to solve the expression problem. Multimethods do so but with limitations. It has a locked resolving algorithm and complects state and extensibility.
