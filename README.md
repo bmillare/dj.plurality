@@ -26,12 +26,12 @@ Plural functions were coined [here](https://groups.google.com/forum/?fromgroups=
  - modify-implementation
  - provides a way to access all the implementations
 
-This is accomplished via metadata. All of this data is stored in the metadata of the plural-fn in the key, `:dj.plurality`
+Extensibility is accomplished via metadata. All of this data is stored in the metadata of the plural-fn in the key, `:dj.plurality`
 
 For example:
 
 ```lisp
-(with-meta plural-fn
+(with-meta some-plural-fn
  (merge existing-metadata
         {:dj.plurality {:modify-implementations (fn ...)
                         :implementations [...]}}
@@ -40,7 +40,7 @@ For example:
 dj.plurality provides helper functions to extract the information from the metadata, call the appropriate functions, and return the new plural-fn with updated implementations.
 
 ```lisp
-(update-implementation plural-fn
+(update-implementation some-plural-fn
  assoc
  [:triangle :square] (fn [x y] (println x y)))
 ```
