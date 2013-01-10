@@ -30,7 +30,7 @@ Extensibility is accomplished via metadata. All of this data is stored in the me
 
 For example:
 
-```lisp
+```clojure
 (with-meta some-plural-fn
  (merge existing-metadata
         {:dj.plurality {:modify-implementations (fn ...)
@@ -39,7 +39,7 @@ For example:
 
 dj.plurality provides helper functions to extract the information from the metadata, call the appropriate functions, and return the new plural-fn with updated implementations.
 
-```lisp
+```clojure
 (update-implementation some-plural-fn
  assoc
  [:triangle :square] (fn [x y] (println x y)))
@@ -65,7 +65,7 @@ dj.plurality will provide core implementations such as multimethods and predicat
 
 ## Example Usage
 
-```lisp
+```clojure
 (require '[dj.plurality :as dp])
 (let [x (dp/->simple-multi-fn {java.lang.Long inc}
                               type)
