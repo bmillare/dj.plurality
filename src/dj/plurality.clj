@@ -186,6 +186,106 @@ Arity optimized for 5 or less args, but supports greater arity.
                                                  (->simple-multi-fn imps default-imp dispatch-fn))
                        :implementations implementations}})))
 
+(defn ->recursive-simple-multi-fn
+  "
+Experimental!
+
+Multimethods with recursion off multi-fn but without using vars (but
+using very fast AtomicReferences for delayed binding)
+
+values of :implementations map must accept the multifn and return the implementation
+
+ex:
+ {:some-key
+  (fn [multi-fn] (fn [x y] (+ (multi-fn x) y)))}
+
+ie. the called implementation will be generated using values in :implementations
+
+Arity optimized for 5 or less args, but supports greater arity.
+"
+  [implementations default-imp dispatch-fn]
+  (let [ ;; this is a really fast reference, slightly faster than atoms, and much faster than vars
+        implementations-ref (java.util.concurrent.atomic.AtomicReference.)
+        default-imp-ref (java.util.concurrent.atomic.AtomicReference.)
+        multi-fn (fn
+                   ([a1]
+                      (let [f ((.get implementations-ref) (dispatch-fn a1))]
+                        (if f
+                          (f a1)
+                          ((.get default-imp-ref) a1))))
+                   ([a1 a2]
+                      (let [f ((.get implementations-ref) (dispatch-fn a1 a2))]
+                        (if f
+                          (f a1
+                             a2)
+                          ((.get default-imp-ref)
+                            a1
+                            a2))))
+                   ([a1 a2 a3]
+                      (let [f ((.get implementations-ref) (dispatch-fn a1 a2 a3))]
+                        (if f
+                          (f a1
+                             a2
+                             a3)
+                          ((.get default-imp-ref)
+                            a1
+                            a2
+                            a3))))
+                   ([a1 a2 a3 a4]
+                      (let [f ((.get implementations-ref) (dispatch-fn a1 a2 a3 a4))]
+                        (if f
+                          (f a1
+                             a2
+                             a3
+                             a4)
+                          ((.get default-imp-ref)
+                            a1
+                            a2
+                            a3
+                            a4))))
+                   ([a1 a2 a3 a4 a5]
+                      (let [f ((.get implementations-ref) (dispatch-fn a1 a2 a3 a4 a5))]
+                        (if f
+                          (f a1
+                             a2
+                             a3
+                             a4
+                             a5)
+                          ((.get default-imp-ref)
+                            a1
+                            a2
+                            a3
+                            a4
+                            a5))))
+                   ([a1 a2 a3 a4 a5 & args]
+                      (let [f ((.get implementations-ref) (apply dispatch-fn a1 a2 a3 a4 a5 args))]
+                        (if f
+                          (apply f
+                                 a1
+                                 a2
+                                 a3
+                                 a4
+                                 a5
+                                 args)
+                          (apply (.get default-imp-ref)
+                                 a1
+                                 a2
+                                 a3
+                                 a4
+                                 a5
+                                 args)))))]
+    (.set implementations-ref (reduce-kv (fn [ret k v]
+                                           (assoc ret
+                                             k
+                                             (v multi-fn)))
+                                         {}
+                                         implementations))
+    (.set default-imp-ref (default-imp multi-fn))
+    (with-meta multi-fn
+      {:dj.plurality {:modify-implementations (fn [imps]
+                                                (->recursive-simple-multi-fn imps default-imp dispatch-fn))
+                      :implementations implementations}})))
+
 (defn ->simple-predicate-fn
   [implementations]
   (with-meta (fn [& args]
