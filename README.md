@@ -8,6 +8,8 @@ Decomplection
 
 - metadata is used extensively for extensibility
 
+- recursive multi-fns implemented
+
 ## Wiki
 
 See [wiki](https://github.com/bmillare/dj.plurality/wiki) for more articles on the subject.
